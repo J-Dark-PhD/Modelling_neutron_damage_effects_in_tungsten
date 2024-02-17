@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.colors import LogNorm
 import shutil
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import generate_data
 
-rcParams['text.usetex']= True if shutil.which('latex') else False
+rcParams["text.usetex"] = True if shutil.which("latex") else False
+
 
 def plot_fig_2_annealed_trap_fitting():
     """
@@ -13,10 +16,6 @@ def plot_fig_2_annealed_trap_fitting():
     """
 
     test_temperatures = [370, 400, 500, 600, 800]
-    defect_type_1_densities = [0.230, 0.230, 0.225, 0.153, 0.107]  # at.%
-    defect_type_2_densities = [0.290, 0.290, 0.280, 0.280, 0.189]  # at.%
-    defect_type_3_densities = [0.05, 0.05, 0.05, 0.05, 0.06]  # at.%
-    annealing_time = 7200
 
     # read fitting data
     annealed_defect_type_1_densities = np.genfromtxt(
@@ -41,7 +40,7 @@ def plot_fig_2_annealed_trap_fitting():
     # defect type I
     plt.scatter(
         test_temperatures,
-        defect_type_1_densities,
+        generate_data.defect_type_1_densities,
         marker="x",
         color=green_ryb,
     )
@@ -55,7 +54,7 @@ def plot_fig_2_annealed_trap_fitting():
     # defect type II
     plt.scatter(
         test_temperatures,
-        defect_type_2_densities,
+        generate_data.defect_type_2_densities,
         marker="x",
         color=firebrick,
     )
@@ -69,7 +68,7 @@ def plot_fig_2_annealed_trap_fitting():
     # defect type III
     plt.scatter(
         test_temperatures,
-        defect_type_3_densities,
+        generate_data.defect_type_3_densities,
         marker="x",
         color=electric_blue,
     )
@@ -110,7 +109,7 @@ def plot_fig_3_trap_density_distribution():
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
     plt.tight_layout()
-   
+
 
 def plot_fig_4_TDS_data_fitted():
     """
@@ -147,7 +146,6 @@ def plot_fig_4_TDS_data_fitted():
                         flux_2.append(float(row[3]))
         flux = -np.asarray(flux_1) - np.asarray(flux_2)
         fitting_data.append([T_sim, flux])
-
 
     # ##### plotting ##### #
 
@@ -202,9 +200,11 @@ def plot_fig_4_TDS_data_fitted():
     ax = plt.gca()
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0.112, hspace=0.071)
-    plt.colorbar(sm, label=r"Damage (dpa)")
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+
+    plt.colorbar(sm, cax=cax, label=r"Damage (dpa)")
+    # plt.colorbar(sm, cax=ax, label=r"Damage (dpa)")
 
 
 def plot_fig_5_damaged_trap_fitting():
@@ -212,13 +212,6 @@ def plot_fig_5_damaged_trap_fitting():
     TDS data from T.Swartz-Selinger, currently unpublished
     """
     dpa_values = [0, 0.001, 0.005, 0.023, 0.1, 0.23, 0.5, 2.5]
-
-    # trap density variations, fitted from TDS data
-    trap_D1_densities = [0, 4.5e24, 7.0e24, 2.4e25, 5.4e25, 5.8e25, 6.0e25, 6.2e25]
-    trap_D2_densities = [0, 1.0e24, 2.5e24, 1.4e25, 3.8e25, 4.4e25, 4.8e25, 5.8e25]
-    trap_D3_densities = [0, 5.0e23, 1.0e24, 6.0e24, 2.8e25, 3.5e25, 4.4e25, 5.1e25]
-    trap_D4_densities = [0, 1.0e24, 1.9e24, 2.1e25, 3.6e25, 4.0e25, 4.2e25, 4.5e25]
-    trap_D5_densities = [0, 2.0e23, 1.6e24, 6.0e24, 1.1e25, 1.4e25, 1.8e25, 2.0e25]
 
     # read fitting data
     trap_D1_fitting = np.genfromtxt("data/damage_trap_D1_fitting.txt")
@@ -249,7 +242,9 @@ def plot_fig_5_damaged_trap_fitting():
     # highlight trap 1
     ax1 = fig.add_subplot(511)
     plt.sca(ax1)
-    plt.scatter(dpa_values, trap_D1_densities, marker="x", color=firebrick)
+    plt.scatter(
+        dpa_values, generate_data.trap_D1_densities, marker="x", color=firebrick
+    )
     plt.plot(dpa_x_values, trap_D1_fitting, color=firebrick, label=r"Trap D1")
     plt.plot(dpa_x_values, trap_D2_fitting, color="grey", alpha=0.2)
     plt.plot(dpa_x_values, trap_D3_fitting, color="grey", alpha=0.2)
@@ -261,7 +256,9 @@ def plot_fig_5_damaged_trap_fitting():
     # highlight trap D2
     ax2 = fig.add_subplot(512)
     plt.sca(ax2)
-    plt.scatter(dpa_values, trap_D2_densities, color=pewter_blue, marker="x")
+    plt.scatter(
+        dpa_values, generate_data.trap_D2_densities, color=pewter_blue, marker="x"
+    )
     plt.plot(dpa_x_values, trap_D2_fitting, color=pewter_blue, label=r"Trap D2")
     plt.plot(dpa_x_values, trap_D1_fitting, color="grey", alpha=0.2)
     plt.plot(dpa_x_values, trap_D3_fitting, color="grey", alpha=0.2)
@@ -272,7 +269,9 @@ def plot_fig_5_damaged_trap_fitting():
     # highlight trap D3
     ax3 = fig.add_subplot(513)
     plt.sca(ax3)
-    plt.scatter(dpa_values, trap_D3_densities, color=electric_blue, marker="x")
+    plt.scatter(
+        dpa_values, generate_data.trap_D3_densities, color=electric_blue, marker="x"
+    )
     plt.plot(dpa_x_values, trap_D3_fitting, color=electric_blue, label=r"Trap D3")
     plt.plot(dpa_x_values, trap_D1_fitting, color="grey", alpha=0.2)
     plt.plot(dpa_x_values, trap_D2_fitting, color="grey", alpha=0.2)
@@ -283,7 +282,9 @@ def plot_fig_5_damaged_trap_fitting():
     # highlight trap D4
     ax4 = fig.add_subplot(514)
     plt.sca(ax4)
-    plt.scatter(dpa_values, trap_D4_densities, color=green_ryb, marker="x")
+    plt.scatter(
+        dpa_values, generate_data.trap_D4_densities, color=green_ryb, marker="x"
+    )
     plt.plot(dpa_x_values, trap_D4_fitting, color=green_ryb, label=r"Trap D4")
     plt.plot(dpa_x_values, trap_D1_fitting, color="grey", alpha=0.2)
     plt.plot(dpa_x_values, trap_D2_fitting, color="grey", alpha=0.2)
@@ -294,7 +295,7 @@ def plot_fig_5_damaged_trap_fitting():
     # highlight trap D5
     ax5 = fig.add_subplot(515)
     plt.sca(ax5)
-    plt.scatter(dpa_values, trap_D5_densities, color="black", marker="x")
+    plt.scatter(dpa_values, generate_data.trap_D5_densities, color="black", marker="x")
     plt.plot(dpa_x_values, trap_D5_fitting, color="black", label=r"Trap D5")
     plt.plot(dpa_x_values, trap_D1_fitting, color="grey", alpha=0.2)
     plt.plot(dpa_x_values, trap_D2_fitting, color="grey", alpha=0.2)
@@ -305,7 +306,7 @@ def plot_fig_5_damaged_trap_fitting():
 
     for ax in [ax1, ax2, ax3, ax4, ax5]:
         plt.sca(ax)
-        ax.get_shared_x_axes().join(ax, ax5)
+        ax.get_shared_x_axes().joined(ax, ax5)
         plt.ylim(0, 7e25)
         plt.xlim(left=0)
         ax.spines["top"].set_visible(False)
@@ -318,12 +319,12 @@ def plot_fig_5_damaged_trap_fitting():
     ax4.set_xticklabels([])
 
     plt.tight_layout()
-    
+
 
 if __name__ == "__main__":
     plot_fig_2_annealed_trap_fitting()
     plot_fig_3_trap_density_distribution()
     plot_fig_4_TDS_data_fitted()
     plot_fig_5_damaged_trap_fitting()
-    
+
     plt.show()
