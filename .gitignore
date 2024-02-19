@@ -1,3 +1,4 @@
 *.pyc
 *.xdmf
+*.h5
 scripts/
