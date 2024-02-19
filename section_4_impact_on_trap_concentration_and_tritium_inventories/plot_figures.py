@@ -95,7 +95,7 @@ def plot_fig_7_inventory_transient_and_distribution():
     fig, axs = plt.subplots(nrows=2, ncols=1, figsize=([6.4, 9.6]))
 
     # transient plot
-    results_folder = "data/festim_model_results/"
+    results_folder = "data/festim_model_results/transient_figure/"
     for dpa, colour in zip(dpa_values, colours):
         data_file = results_folder + "dpa={:.1e}/T=700/derived_quantities.csv".format(dpa)
         data = np.genfromtxt(data_file, delimiter=",", names=True)
@@ -125,7 +125,7 @@ def plot_fig_7_inventory_transient_and_distribution():
     axs[0].spines["right"].set_visible(False)
 
     # ##### retention profile ##### #
-    results_folder = "data/profiles/"
+    results_folder = "data/festim_model_results/profiles/"
     data_file = results_folder + "retention_profile_dpa=1.0e+02.csv"
     x_data = np.genfromtxt(data_file, delimiter=",", names=True)
     x_values = x_data["arc_length"]
@@ -208,7 +208,6 @@ def plot_fig_8_inventory_variation():
     axs[0].set_yscale("log")
     axs[0].set_ylabel(r"T Inventory (m-3)")
     axs[0].set_xlim(600, 1300)
-    # axs[0].set_ylim(1, 2)
     axs[0].spines["top"].set_visible(False)
     axs[0].spines["right"].set_visible(False)
     
@@ -218,7 +217,6 @@ def plot_fig_8_inventory_variation():
     axs[1].set_ylabel(r"Relative T Inventory")
     axs[1].set_xlabel(r"Temperature (K)")
     axs[1].set_xlim(600, 1300)
-    # axs[1].set_ylim(1, 2)
     axs[1].spines["top"].set_visible(False)
     axs[1].spines["right"].set_visible(False)
     
