@@ -33,11 +33,10 @@ trap_D5_K = 1.0e26
 trap_D5_n_max = 2.0e25
 
 # general trap parameters
-k_0 = 5.22e-17
-p_0 = 1e13
 trap_1_density = 2e22
 
 # common values
+atom_density_W = 6.3222e28
 k_B = F.k_B  # eV K-1
 day = 3600 * 24
 fpy = day * 365
@@ -55,7 +54,7 @@ def generate_fig_7_inventory_transient_and_distribution():
                 print("running case T = {:.0f}, dpa = {:.1e}, n = {}".format(T, dpa, n))
 
                 my_folder_name = (
-                    "data/festim_model_results/dpa={:.1e}/T={:.0f}/".format(dpa, T)
+                    "data/festim_model_results/transient_figure/dpa={:.1e}/T={:.0f}/".format(dpa, T)
                 )
 
                 festim_sim(
@@ -65,9 +64,12 @@ def generate_fig_7_inventory_transient_and_distribution():
                     total_time=fpy,
                     cells=n,
                     export_retention_field=False,
+                    initial_stepsize=0.1,
+                    step_size_change_ratio=1.01,
                 )
                 break
             except Exception as e:
+                # if simulation fails, re-run with denser mesh
                 n *= 1.5
                 n = int(n)
                 print("increasing n to {}".format(n))
@@ -75,10 +77,12 @@ def generate_fig_7_inventory_transient_and_distribution():
     festim_sim(
         dpa=0,
         T=T,
-        results_folder_name="data/festim_model_results/dpa=0.0e+00/T={:.0f}/".format(T),
+        results_folder_name="data/festim_model_results/transient_figure/dpa=0.0e+00/T={:.0f}/".format(T),
         total_time=fpy,
         cells=1000,
         export_retention_field=True,
+        initial_stepsize=0.1,
+        step_size_change_ratio=1.01,
     )
 
     # profiles
@@ -88,7 +92,7 @@ def generate_fig_7_inventory_transient_and_distribution():
             try:
                 print("running case dpa = {:.1e}, n = {}".format(dpa, n))
 
-                my_folder_name = "data/profiles/data/dpa={:.1e}/".format(dpa)
+                my_folder_name = "data/festim_model_results/profiles/data/dpa={:.1e}/".format(dpa)
 
                 festim_sim(
                     dpa=dpa,
@@ -100,6 +104,7 @@ def generate_fig_7_inventory_transient_and_distribution():
                 )
                 break
             except Exception as e:
+                # if simulation fails, re-run with denser mesh                
                 n *= 1.5
                 n = int(n)
                 print("increasing n to {}".format(n))
@@ -118,7 +123,7 @@ def generate_fig_7_inventory_transient_and_distribution():
 def generate_fig_8_inventory_variataion():
 
     dpa_values = np.geomspace(1e-05, 1e02, 8)
-    T_values = np.linspace(600, 1300, 50)
+    T_values = np.linspace(1300, 600, 50)
 
     for T in T_values:
         for dpa in dpa_values:
@@ -169,6 +174,8 @@ def festim_sim(
     total_time=100,
     cells=1000,
     export_retention_field=False,
+    initial_stepsize=1,
+    step_size_change_ratio=1.1,
 ):
     my_model = F.Simulation(log_level=40)
 
@@ -177,23 +184,23 @@ def festim_sim(
     my_model.materials = F.Materials([tungsten])
 
     # define traps
-    fpy = 3600 * 24 * 365.25
+
     defined_absolute_tolerance = 1e07
     defined_relative_tolerance = 1e-01
     defined_maximum_iterations = 10
 
     trap_W_1 = F.Trap(
-        k_0=k_0,
-        E_k=E_D,
-        p_0=p_0,
-        E_p=1.0,
-        density=2e22,
+        k_0=tungsten.D_0 / (1.1e-10**2 * 6 * atom_density_W),
+        E_k=tungsten.E_D,
+        p_0=1e13,
+        E_p=1.04,
+        density=2.4e22,
         materials=tungsten,
     )
     trap_W_damage_1 = F.NeutronInducedTrap(
-        k_0=k_0,
-        E_k=E_D,
-        p_0=p_0,
+        k_0=tungsten.D_0 / (1.1e-10**2 * 6 * atom_density_W),
+        E_k=tungsten.E_D,
+        p_0=1e13,
         E_p=1.15,
         A_0=A_0_1,
         E_A=E_A_1,
@@ -206,10 +213,10 @@ def festim_sim(
         maximum_iterations=defined_maximum_iterations,
     )
     trap_W_damage_2 = F.NeutronInducedTrap(
-        k_0=k_0,
-        E_k=E_D,
-        p_0=p_0,
+        k_0=tungsten.D_0 / (1.1e-10**2 * 6 * atom_density_W),
+        E_k=tungsten.E_D,
         E_p=1.35,
+        p_0=1e13,
         A_0=A_0_1,
         E_A=E_A_1,
         phi=dpa / fpy,
@@ -221,9 +228,9 @@ def festim_sim(
         maximum_iterations=defined_maximum_iterations,
     )
     trap_W_damage_3 = F.NeutronInducedTrap(
-        k_0=k_0,
-        E_k=E_D,
-        p_0=p_0,
+        k_0=tungsten.D_0 / (1.1e-10**2 * 6 * atom_density_W),
+        E_k=tungsten.E_D,
+        p_0=1e13,
         E_p=1.65,
         A_0=A_0_2,
         E_A=E_A_2,
@@ -236,9 +243,9 @@ def festim_sim(
         maximum_iterations=defined_maximum_iterations,
     )
     trap_W_damage_4 = F.NeutronInducedTrap(
-        k_0=k_0,
-        E_k=E_D,
-        p_0=p_0,
+        k_0=tungsten.D_0 / (1.1e-10**2 * 6 * atom_density_W),
+        E_k=tungsten.E_D,
+        p_0=1e13,
         E_p=1.85,
         A_0=A_0_2,
         E_A=E_A_2,
@@ -251,9 +258,9 @@ def festim_sim(
         maximum_iterations=defined_maximum_iterations,
     )
     trap_W_damage_5 = F.NeutronInducedTrap(
-        k_0=k_0,
-        E_k=E_D,
-        p_0=p_0,
+        k_0=tungsten.D_0 / (1.1e-10**2 * 6 * atom_density_W),
+        E_k=tungsten.E_D,
+        p_0=1e13,
         E_p=2.05,
         A_0=A_0_3,
         E_A=E_A_3,
@@ -289,8 +296,8 @@ def festim_sim(
             surfaces=1,
             phi=1e20,
             R_p=3e-09,
-            D_0=D_0,
-            E_D=E_D,
+            D_0=tungsten.D_0,
+            E_D=tungsten.E_D,
         ),
     ]
 
@@ -328,8 +335,8 @@ def festim_sim(
 
     # define settings
     my_model.dt = F.Stepsize(
-        initial_value=0.1,
-        stepsize_change_ratio=1.01,
+        initial_value=initial_stepsize,
+        stepsize_change_ratio=step_size_change_ratio,
         dt_min=1e-1,
     )
     my_model.settings = F.Settings(
