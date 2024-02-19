@@ -111,7 +111,7 @@ def plot_fig_3_trap_density_distribution():
     plt.tight_layout()
 
 
-def plot_fig_4_TDS_data_fitted():
+def plot_fig_4a_TDS_data_fitted():
     """
     TDS data from T.Swartz-Selinger, currently unpublished
     """
@@ -206,6 +206,135 @@ def plot_fig_4_TDS_data_fitted():
     plt.colorbar(sm, cax=cax, label=r"Damage (dpa)")
     # plt.colorbar(sm, cax=ax, label=r"Damage (dpa)")
 
+
+def plot_fig_4b_0_1_dpa_TDS_data_fitted():
+    green_ryb = (117 / 255, 184 / 255, 42 / 255)
+    firebrick = (181 / 255, 24 / 255, 32 / 255)
+    pewter_blue = (113 / 255, 162 / 255, 182 / 255)
+    blue_jeans = (96 / 255, 178 / 255, 229 / 255)
+    electric_blue = (83 / 255, 244 / 255, 255 / 255)
+
+    implantation_time = 72 * 3600
+    resting_time = 0.5 * 24 * 3600
+
+    tds_data_file = "data/tds_data_schwartz_selinger/0.1_dpa.csv"
+    tds_data = np.genfromtxt(tds_data_file, delimiter=",")
+
+    temperatures = tds_data[:, 0]
+
+    area = 12e-03 * 15e-03
+    flux = tds_data[:, 1] / area
+
+    plt.figure()
+    plt.scatter(temperatures, flux, label="Exp", color="black")
+
+    T_sim = []
+    flux1, flux2 = [], []
+    solute = []
+    ret = []
+    t = []
+    trap1 = []
+    trap2 = []
+    trap3 = []
+    trap4 = []
+    trap5 = []
+    trap6 = []
+
+    with open("data/damaged_sample_tds_fittings/dpa_0.1/last.csv", "r") as csvfile:
+        plots = csv.reader(csvfile, delimiter=",")
+        for row in plots:
+            if "t(s)" not in row:
+                if float(row[0]) >= implantation_time + resting_time * 0.75:
+                    t.append(float(row[0]))
+                    T_sim.append(float(row[1]))
+                    flux1.append(float(row[2]))
+                    flux2.append(float(row[3]))
+                    solute.append(float(row[4]))
+                    ret.append(float(row[5]))
+                    trap1.append(float(row[6]))
+                    trap2.append(float(row[7]))
+                    trap3.append(float(row[8]))
+                    trap4.append(float(row[9]))
+                    trap5.append(float(row[10]))
+                    trap6.append(float(row[11]))
+
+
+    trap_1_contrib = (np.diff(trap1) / np.diff(t)) * -1
+    trap_2_contrib = (np.diff(trap2) / np.diff(t)) * -1
+    trap_3_contrib = (np.diff(trap3) / np.diff(t)) * -1
+    trap_4_contrib = (np.diff(trap4) / np.diff(t)) * -1
+    trap_5_contrib = (np.diff(trap5) / np.diff(t)) * -1
+    trap_6_contrib = (np.diff(trap6) / np.diff(t)) * -1
+    
+    plt.plot(
+        T_sim,
+        -np.asarray(flux1) - np.asarray(flux2),
+        label="Simulation",
+        color="orange",
+        linewidth=2,
+    )
+
+    plt.plot(
+        T_sim[1:],
+        trap_1_contrib,
+        linestyle="dashed",
+        color=green_ryb,
+        label=r"Trap 1",
+    )
+    plt.plot(
+        T_sim[1:],
+        trap_2_contrib,
+        linestyle="dashed",
+        color=firebrick,
+        label=r"Trap D1",
+    )
+    plt.plot(
+        T_sim[1:],
+        trap_3_contrib,
+        linestyle="dashed",
+        color=blue_jeans,
+        label=r"Trap D2",
+    )
+    plt.plot(
+        T_sim[1:],
+        trap_4_contrib,
+        linestyle="dashed",
+        color=electric_blue,
+        label=r"Trap D3",
+    )
+    plt.plot(
+        T_sim[1:],
+        trap_5_contrib,
+        linestyle="dashed",
+        color=pewter_blue,
+        label=r"Trap D4",
+    )
+    plt.plot(
+        T_sim[1:],
+        trap_6_contrib,
+        linestyle="dashed",
+        color="black",
+        label=r"Trap D5",
+    )
+    plt.fill_between(T_sim[1:], 0, trap_1_contrib, color="grey", alpha=0.1)
+    plt.fill_between(T_sim[1:], 0, trap_2_contrib, color="grey", alpha=0.1)
+    plt.fill_between(T_sim[1:], 0, trap_3_contrib, color="grey", alpha=0.1)
+    plt.fill_between(T_sim[1:], 0, trap_4_contrib, color="grey", alpha=0.1)
+    plt.fill_between(T_sim[1:], 0, trap_5_contrib, color="grey", alpha=0.1)
+    plt.fill_between(T_sim[1:], 0, trap_6_contrib, color="grey", alpha=0.1)
+
+
+
+    plt.xlim(300, 1000)
+    plt.ylim(bottom=0)
+    plt.xlabel(r"Temperature (K)")
+    plt.ylabel(r"Desorption flux (D m$ ^{-2}$ s$ ^{-1}$)")
+    ax = plt.gca()
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    plt.legend()
+    plt.tight_layout()
+    
 
 def plot_fig_5_damaged_trap_fitting():
     """
@@ -324,7 +453,8 @@ def plot_fig_5_damaged_trap_fitting():
 if __name__ == "__main__":
     plot_fig_2_annealed_trap_fitting()
     plot_fig_3_trap_density_distribution()
-    plot_fig_4_TDS_data_fitted()
+    plot_fig_4a_TDS_data_fitted()
+    plot_fig_4b_0_1_dpa_TDS_data_fitted()
     plot_fig_5_damaged_trap_fitting()
 
     plt.show()
